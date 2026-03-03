@@ -23,4 +23,5 @@ source:
 
 executor:
   debug: ${oc.env:DEBUG,false}
-  source: ['arxiv']
+  source:
+    - arxiv
