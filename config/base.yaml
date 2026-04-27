@@ -34,12 +34,11 @@ reranker:
     model: jinaai/jina-embeddings-v5-text-nano # The Hugging Face model name of the local embedding model. Example: jinaai/jina-embeddings-v5-text-nano
     encode_kwargs:
     # The kwargs for the encode method of the local embedding model for arXiv candidate papers (document side). Details see [here](https://www.sbert.net/docs/package_reference/SentenceTransformer.html#sentence_transformers.SentenceTransformer.encode)
-      task: retrieval
-      prompt_name: document
+    # For asymmetric retrieval models like Jina v5, use task: retrieval.passage here.
+      task: retrieval.passage
     query_encode_kwargs:
-    # The kwargs for encoding Zotero corpus papers (query side). For asymmetric retrieval models like Jina v5, use prompt_name: query here so that Zotero papers are embedded as queries matched against arXiv document embeddings.
-      task: retrieval
-      prompt_name: query
+    # The kwargs for encoding Zotero corpus papers (query side). For asymmetric retrieval models like Jina v5, use task: retrieval.query here so that Zotero papers are embedded as queries matched against arXiv document embeddings.
+      task: retrieval.query
   api:
     key: null # API Key of your embedding model API. Example: sk-xxx
     base_url: null # API URL of your embedding model API. Example: https://api.openai.com/v1

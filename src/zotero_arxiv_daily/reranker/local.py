@@ -1,4 +1,5 @@
 from .base import BaseReranker, register_reranker
+from omegaconf import OmegaConf
 import logging
 import warnings
 import numpy as np
@@ -21,11 +22,11 @@ class LocalReranker(BaseReranker):
 
         encoder = SentenceTransformer(self.config.reranker.local.model, trust_remote_code=True)
         if self.config.reranker.local.encode_kwargs:
-            encode_kwargs = self.config.reranker.local.encode_kwargs
+            encode_kwargs = OmegaConf.to_container(self.config.reranker.local.encode_kwargs, resolve=True)
         else:
             encode_kwargs = {}
         if self.config.reranker.local.get("query_encode_kwargs"):
-            query_encode_kwargs = self.config.reranker.local.query_encode_kwargs
+            query_encode_kwargs = OmegaConf.to_container(self.config.reranker.local.query_encode_kwargs, resolve=True)
         else:
             query_encode_kwargs = encode_kwargs
         s1_feature = encoder.encode(s1,**encode_kwargs,show_progress_bar=True)

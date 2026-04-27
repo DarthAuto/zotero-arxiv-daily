@@ -24,8 +24,11 @@ class Executor:
         zot = zotero.Zotero(self.config.zotero.user_id, 'user', self.config.zotero.api_key)
         collections = zot.everything(zot.collections())
         collections = {c['key']:c for c in collections}
-        corpus = zot.everything(zot.items(itemType='conferencePaper || journalArticle || preprint'))
-        corpus = [c for c in corpus if c['data']['abstractNote'] != '']
+        all_items = zot.everything(zot.items(itemType='conferencePaper || journalArticle || preprint'))
+        no_abstract = [c for c in all_items if c['data']['abstractNote'] == '']
+        corpus = [c for c in all_items if c['data']['abstractNote'] != '']
+        if no_abstract:
+            logger.warning(f"{len(no_abstract)} zotero items skipped due to missing abstract (out of {len(all_items)} total)")
         def get_collection_path(col_key:str) -> str:
             if p := collections[col_key]['data']['parentCollection']:
                 return get_collection_path(p) + '/' + collections[col_key]['data']['name']
@@ -34,7 +37,11 @@ class Executor:
         for c in corpus:
             paths = [get_collection_path(col) for col in c['data']['collections']]
             c['paths'] = paths
-        logger.info(f"Fetched {len(corpus)} zotero papers")
+        logger.info(f"Fetched {len(corpus)} zotero papers with abstracts")
+        if corpus:
+            samples = random.sample(corpus, min(3, len(corpus)))
+            for s in samples:
+                logger.debug(f"  Sample corpus paper: {s['data']['title'][:80]}")
         return [CorpusPaper(
             title=c['data']['title'],
             abstract=c['data']['abstractNote'],

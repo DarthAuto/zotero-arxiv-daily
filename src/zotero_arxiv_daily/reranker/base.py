@@ -3,6 +3,7 @@ from omegaconf import DictConfig
 from ..protocol import Paper, CorpusPaper
 import numpy as np
 from typing import Type
+from loguru import logger
 class BaseReranker(ABC):
     def __init__(self, config:DictConfig):
         self.config = config
@@ -13,7 +14,9 @@ class BaseReranker(ABC):
         time_decay_weight: np.ndarray = time_decay_weight / time_decay_weight.sum()
         sim = self.get_similarity_score([c.abstract for c in candidates], [c.abstract for c in corpus])
         assert sim.shape == (len(candidates), len(corpus))
+        logger.debug(f"Similarity matrix stats: min={sim.min():.4f}, max={sim.max():.4f}, mean={sim.mean():.4f}, std={sim.std():.4f}")
         scores = (sim * time_decay_weight).sum(axis=1) * 10 # [n_candidate]
+        logger.debug(f"Score stats: min={scores.min():.4f}, max={scores.max():.4f}, mean={scores.mean():.4f}, top3={sorted(scores, reverse=True)[:3]}")
         for s,c in zip(scores,candidates):
             c.score = s
         candidates = sorted(candidates,key=lambda x: x.score,reverse=True)
