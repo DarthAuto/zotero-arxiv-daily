@@ -24,7 +24,11 @@ class LocalReranker(BaseReranker):
             encode_kwargs = self.config.reranker.local.encode_kwargs
         else:
             encode_kwargs = {}
+        if self.config.reranker.local.get("query_encode_kwargs"):
+            query_encode_kwargs = self.config.reranker.local.query_encode_kwargs
+        else:
+            query_encode_kwargs = encode_kwargs
         s1_feature = encoder.encode(s1,**encode_kwargs,show_progress_bar=True)
-        s2_feature = encoder.encode(s2,**encode_kwargs,show_progress_bar=True)
+        s2_feature = encoder.encode(s2,**query_encode_kwargs,show_progress_bar=True)
         sim = encoder.similarity(s1_feature, s2_feature)
         return sim.numpy()
